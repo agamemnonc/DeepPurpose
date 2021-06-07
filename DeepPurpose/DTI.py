@@ -421,7 +421,14 @@ class DBTA:
 		writer = SummaryWriter()
 		t_start = time() 
 		iteration_loss = 0
+		positives_train = train
 		for epo in range(train_epoch):
+			if self.config['negative_sampling']:
+				train = self.create_negatives_pdbind_sampling(positives_train)
+				training_generator = data.DataLoader(
+					data_process_loader(train.index.values, train.Label.values,
+										train, **self.config), **params)
+
 			for i, (v_d, v_p, label) in enumerate(training_generator):
 				if self.target_encoding == 'Transformer':
 					v_p = v_p
@@ -601,8 +608,9 @@ class DBTA:
 
 		self.binary = self.config['binary']
 
-	def create_negatives_pdbind_sampling(df, negative_sampling_fraction=1,
-										 random_seed=0):
+	@staticmethod
+	def create_negatives_pdbind_sampling(
+			df, negative_sampling_fraction=1, random_seed=0):
 		"""
 		Samples negatives from within the file_index DataFrame
 		:return: file_index DataFrame containing both positives and randomly
