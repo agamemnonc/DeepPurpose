@@ -296,6 +296,10 @@ class DBTA:
 		if 'decay' not in self.config.keys():
 			self.config['decay'] = 0
 
+		# If negative sampling is enabled, initialize the RNG
+		if self.config['negative_sampling']:
+			self._neg_sampling_rng = np.random.RandomState(seed=0)
+
 	def test_(self, data_generator, model, repurposing_mode = False, test = False):
 		y_pred = []
 		y_label = []
@@ -610,20 +614,18 @@ class DBTA:
 
 	@staticmethod
 	def create_negatives_pdbind_sampling(
-			df, negative_sampling_fraction=1, random_seed=0):
+			df, negative_sampling_fraction=1):
 		"""
 		Samples negatives from within the file_index DataFrame
 		:return: file_index DataFrame containing both positives and randomly
 		sampled negatives
 		"""
-		_neg_sampling_rng = np.random.RandomState(seed=random_seed)
-
 		positives_df = df
 		ligand_df = df[['SMILES', 'drug_encoding']]
 		ligand_df['id.ligand'] = list(ligand_df.index)
 		protein_df = df[['Target Sequence', 'target_encoding']]
 		protein_df['id.protein'] = list(protein_df.index)
-		random_state = _neg_sampling_rng.randint(0, int(1e9))
+		random_state = self._neg_sampling_rng.randint(0, int(1e9))
 		random_ligands = ligand_df.sample(
 			frac=negative_sampling_fraction,
 			replace=True,
