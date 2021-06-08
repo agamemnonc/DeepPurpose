@@ -612,9 +612,8 @@ class DBTA:
 
 		self.binary = self.config['binary']
 
-	@staticmethod
 	def create_negatives_pdbind_sampling(
-			df, negative_sampling_fraction=1):
+			self, df, negative_sampling_fraction=1):
 		"""
 		Samples negatives from within the file_index DataFrame
 		:return: file_index DataFrame containing both positives and randomly
