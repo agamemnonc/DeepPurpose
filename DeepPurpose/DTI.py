@@ -297,8 +297,9 @@ class DBTA:
 			self.config['decay'] = 0
 
 		# If negative sampling is enabled, initialize the RNG
-		if self.config['negative_sampling']:
-			self._neg_sampling_rng = np.random.RandomState(seed=0)
+		if 'negative_sampling' in self.config:
+			if self.config['negative_sampling']:
+				self._neg_sampling_rng = np.random.RandomState(seed=0)
 
 	def test_(self, data_generator, model, repurposing_mode = False, test = False):
 		y_pred = []
@@ -427,11 +428,14 @@ class DBTA:
 		iteration_loss = 0
 		positives_train = train
 		for epo in range(train_epoch):
-			if self.config['negative_sampling']:
-				train = self.create_negatives_pdbind_sampling(positives_train)
-				training_generator = data.DataLoader(
-					data_process_loader(train.index.values, train.Label.values,
-										train, **self.config), **params)
+			if 'negative_sampling' in self.config:
+				if self.config['negative_sampling']:
+					train = self.create_negatives_pdbind_sampling(
+						positives_train)
+					training_generator = data.DataLoader(
+						data_process_loader(
+							train.index.values, train.Label.values, train,
+							**self.config), **params)
 
 			for i, (v_d, v_p, label) in enumerate(training_generator):
 				if self.target_encoding == 'Transformer':
