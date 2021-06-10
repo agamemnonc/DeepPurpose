@@ -642,5 +642,10 @@ class DBTA:
 		negatives_df = negatives_df[
 			negatives_df['id.ligand'] != negatives_df['id.protein']]
 		negatives_df = negatives_df.drop(columns=['id.ligand','id.protein'])
-		return pd.concat([positives_df, negatives_df],
-						 sort=True).reset_index(drop=True)
+
+		# Make sure we don't use the same pair as both a positive and a
+		# negative
+		return pd.concat([positives_df, negatives_df], sort=True).reset_index(
+			drop=True).drop_duplicates(
+			subset=['SMILES', 'Target Sequence'], keep='first').reset_index(
+			drop=True)
